@@ -11,7 +11,7 @@ const STATUS_FLOW = ["planned", "current", "paused", "done", "dropped"];
 
 const TYPE_LABEL = {
   book: "Livre", manga: "Manga", webtoon: "Webtoon", audiobook: "Audio",
-  movie: "Film", series: "Série", anime: "Anime"
+  movie: "Film", series: "Série", anime: "Anime", reportage:"Reportage", article:"Article"
 };
 const STATUS_LABEL = {
   planned: "À voir/lire", current: "En cours", paused: "En pause",
@@ -147,6 +147,8 @@ function onSubmitForm(e) {
     rating: Math.max(0, Math.min(5, Number(data.rating || 0))),
     cover: data.cover?.trim() || "",
     notes: data.notes?.trim() || "",
+    media: data.media?.trim() || "",
+    link: data.link?.trim() || "",
     updatedAt: nowISO()
   };
 
@@ -218,7 +220,20 @@ function renderCard(it) {
   statusPill.textContent = STATUS_LABEL[it.status] ?? it.status;
   statusPill.dataset.status = it.status;
   title.textContent = it.title;
-  creator.textContent = it.creator || "—";
+  // Affiche Auteur + Média si présent
+creator.textContent = [it.creator, it.media].filter(Boolean).join(" · ") || "—";
+
+// Si un lien est présent, ajoute un bouton "Ouvrir le lien"
+const actions = tpl.querySelector(".card-actions");
+if (it.link) {
+  const a = document.createElement("a");
+  a.className = "btn small ghost";
+  a.textContent = "Ouvrir le lien";
+  a.href = it.link;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  actions.prepend(a);
+}
   bar.style.width = `${it.progress ?? 0}%`;
   progressText.textContent = `${it.progress ?? 0}%`;
   notes.textContent = it.notes || "";
@@ -345,6 +360,8 @@ function normalizeItem(it) {
     rating: clamp(it.rating, 0, 5),
     cover: String(it.cover || ""),
     notes: String(it.notes || ""),
+    media: String(it.media || ""),
+    link: String(it.link || ""),
     updatedAt: it.updatedAt || nowISO(),
   };
 }
