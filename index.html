@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Watchlist · Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">𐔌՞. .՞𐦯</span>
+      <h1>lez's <span class="dot">·</span> tracker</h1>
+    </div>
+
+    <div class="actions">
+      <div class="search">
+        <input id="searchInput" type="search" placeholder="Rechercher… (tape Enter)" />
+      </div>
+      <button id="addBtn" class="btn primary">+ Ajouter</button>
+      <!-- …dans <div class="actions"> … -->
+<button id="exportBtn" class="btn ghost">Exporter</button>
+<button id="importBtn" class="btn ghost">Importer</button>
+<input id="importFile" type="file" accept="application/json" hidden />
+
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <nav class="tabs" id="typeTabs">
+        <!-- data-type = clé logique côté JS -->
+        <button class="tab active" data-type="all">✦ Tout</button>
+        <button class="tab" data-type="book">✦ Livres</button>
+        <button class="tab" data-type="manga">✦ Manga</button>
+        <button class="tab" data-type="webtoon">✦ Webtoon</button>
+        <button class="tab" data-type="audiobook">✦ Audio</button>
+        <button class="tab" data-type="movie">✦ Films</button>
+        <button class="tab" data-type="series">✦ Séries</button>
+        <button class="tab" data-type="anime">✦ Anime</button>
+      </nav>
+
+      <div class="panel">
+        <h3>Filtres</h3>
+        <div class="filters">
+          <select id="statusFilter">
+            <option value="all">Statut · Tous</option>
+            <option value="current">En cours</option>
+            <option value="planned">À voir/lire</option>
+            <option value="paused">En pause</option>
+            <option value="dropped">Abandonné</option>
+            <option value="done">Terminé</option>
+          </select>
+          <select id="sortBy">
+            <option value="updated">Trier · Récents</option>
+            <option value="title">Trier · Titre</option>
+            <option value="rating">Trier · Note</option>
+            <option value="progress">Trier · Progression</option>
+          </select>
+          <button id="clearFilters" class="btn ghost">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="panel sticky">
+        <h3>Listes rapides</h3>
+        <ul class="quicklist" id="quickCurrent">
+          <li class="title">En cours…</li>
+        </ul>
+        <ul class="quicklist" id="quickNext">
+          <li class="title">À suivre…</li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="board">
+      <div id="emptyState" class="empty hidden">
+        <p>Ta liste est vide.</p>
+        <button class="btn primary" id="emptyAdd">Ajouter un premier élément</button>
+      </div>
+
+      <div id="cards" class="grid"></div>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+<!-- MODAL -->
+<dialog id="itemDialog">
+  <form id="itemForm" method="dialog">
+    <header class="dialog-header">
+      <h3 id="dialogTitle">Ajouter</h3>
+      <button type="button" id="closeDialog" class="icon-btn" aria-label="Fermer">✕</button>
+    </header>
+
+    <div class="form-grid">
+      <label>Type
+        <select name="type" required>
+          <option value="book">Livre</option>
+          <option value="manga">Manga</option>
+          <option value="webtoon">Webtoon</option>
+          <option value="audiobook">Audiobook</option>
+          <option value="movie">Film</option>
+          <option value="series">Série</option>
+          <option value="anime">Anime</option>
+        </select>
+      </label>
+
+      <label>Titre
+        <input name="title" type="text" placeholder="Titre" required />
+      </label>
+
+      <label>Auteur / Studio (optionnel)
+        <input name="creator" type="text" placeholder="Auteur, studio…" />
+      </label>
+
+      <label>Statut
+        <select name="status" required>
+          <option value="planned">À voir/lire</option>
+          <option value="current" selected>En cours</option>
+          <option value="paused">En pause</option>
+          <option value="dropped">Abandonné</option>
+          <option value="done">Terminé</option>
+        </select>
+      </label>
+
+      <label>Progression (%)
+        <input name="progress" type="number" min="0" max="100" step="1" value="0" />
+      </label>
+
+      <label>Note (0–5)
+        <input name="rating" type="number" min="0" max="5" step="0.5" value="0" />
+      </label>
+
+      <label>Couverture (URL optionnelle)
+        <input name="cover" type="url" placeholder="https://…" />
+      </label>
+
+      <label>Commentaires
+        <textarea name="notes" rows="3" placeholder="Impressions, épisodes/chapitres, etc."></textarea>
+      </label>
+    </div>
+
+    <menu class="dialog-actions">
+      <button type="reset" class="btn ghost">Effacer</button>
+      <button value="cancel" class="btn">Annuler</button>
+      <button type="submit" class="btn primary">Enregistrer</button>
+    </menu>
+
+    <input type="hidden" name="id" />
+  </form>
+</dialog>
+
+
+
+  <template id="cardTpl">
+    <article class="card">
+      <div class="cover"></div>
+      <div class="content">
+        <div class="meta">
+          <span class="type-pill"></span>
+          <span class="status-pill"></span>
+        </div>
+        <h4 class="title"></h4>
+        <p class="creator"></p>
+        <div class="progress-row">
+          <div class="bar"><span></span></div>
+          <span class="progress-text"></span>
+        </div>
+        <div class="rating" aria-label="Note"></div>
+        <p class="notes"></p>
+      </div>
+      <div class="card-actions">
+        <button class="btn small" data-action="edit">Éditer</button>
+        <button class="btn small ghost" data-action="status">↺ Statut</button>
+        <button class="btn small danger" data-action="delete">Supprimer</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
